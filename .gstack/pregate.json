@@ -1,0 +1,26 @@
+{
+  "empty_lanes": [
+    "app/**/*.css",
+    "supabase/**",
+    "docs/**",
+    "public/**",
+    ".env.example",
+    ".gitignore",
+    "package.json",
+    "package-lock.json",
+    "tsconfig.json"
+  ],
+  "dependencies": {
+    "app/api/agent/**": ["lib/agent.test.ts"],
+    "app/api/health/**": ["lib/providers.test.ts"],
+    "app/**/*.tsx": [],
+    "components/**": [],
+    "lib/client.ts": [],
+    "lib/supabase.ts": [],
+    "lib/useSession.ts": [],
+    "scripts/**": [],
+    "next.config.ts": [],
+    "eslint.config.mjs": [],
+    "vitest.config.mts": []
+  }
+}
