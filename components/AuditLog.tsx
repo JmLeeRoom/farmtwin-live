@@ -8,7 +8,7 @@ export default function AuditLog({ events, participants }: { events: EventRow[];
   const byId = useMemo(() => new Map(participants.map((p) => [p.id, p])), [participants]);
   const rows = useMemo(() => [...events].reverse().slice(0, 200), [events]);
   return (
-    <ol className="max-h-[420px] overflow-y-auto text-xs" aria-label="감사 로그">
+    <ol className="max-h-[420px] overflow-y-auto text-xs" aria-label="Audit log">
       {rows.map((e) => (
         <li key={e.id} className="grid grid-cols-[64px_1fr] gap-2 border-b border-slate-100 py-1.5">
           <span className="tabular-nums text-slate-400">{timeHMS(e.created_at)}</span>

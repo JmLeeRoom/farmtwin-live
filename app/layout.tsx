@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "FarmTwin Live",
-  description: "농장 로봇 가상 검증을 여러 사람이 함께 보고, 개입하고, 승인하는 공유 세션",
+  description: "A shared session where everyone who owns the risk watches, steers and approves a farm robot's virtual safety test",
 };
 
 export const viewport: Viewport = {
@@ -14,7 +14,7 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="ko" className="h-full antialiased">
+    <html lang="en" className="h-full antialiased">
       <body className="min-h-full bg-slate-100 text-slate-900">{children}</body>
     </html>
   );

@@ -108,7 +108,7 @@ begin
     update sessions set state = 'drafting' where id = s.id;
     insert into events(session_id, type, actor_kind, actor_id, payload)
     values (s.id, 'steer', 'human', p_participant_id::text,
-            jsonb_build_object('text', coalesce(nullif(p_comment, ''), '반려'), 'from_gate', g.kind));
+            jsonb_build_object('text', coalesce(nullif(p_comment, ''), 'Rejected'), 'from_gate', g.kind));
     return jsonb_build_object('ok', true, 'next', 'drafting');
   end if;
 
@@ -142,7 +142,7 @@ begin
     insert into gates(session_id, kind, required_role, payload)
     values (s.id, 'review', 'reviewer', jsonb_build_object(
               'run_id', v_from_run, 'source', 'recorded', 'explain', s.explain_cache -> v_from_run,
-              'notice', '로컬 러너 오프라인 — 2026-11-01 기록(batch-20261101-081329)으로 검수를 진행합니다. 새 시나리오의 실행 결과가 아닙니다.'))
+              'notice', 'Local runner offline — this review uses the 2026-11-01 records (batch-20261101-081329). These are not results of the new scenario.'))
     returning id into v_next;
     update sessions set state = 'gate_review' where id = s.id;
     insert into events(session_id, type, actor_kind, actor_id, payload)

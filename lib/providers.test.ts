@@ -31,7 +31,7 @@ describe("T5 providers", () => {
     };
     const r = await runStructured({ entries: [entry("codyssey"), entry("anthropic")], instructions: "s", prompt: "p", schema: Draft, callFn });
     expect(n).toBe(2);
-    expect(prompts[1]).toContain("[이전 응답 오류]");
+    expect(prompts[1]).toContain("[Previous response error]");
     expect(r.fallbackUsed).toBe(false);
     expect(r.promptUsed).toBe(prompts[1]);
   });

@@ -24,7 +24,7 @@ describe("T2 patch", () => {
   it("null 삭제 시도는 거부, 숫자 문자열은 숫자로", () => {
     const r = sanitizeScenarioPatch({ requirements: { min_front_gap_m: null, stopped_hold_s: "0.6" } });
     expect(r.patch).toEqual({ requirements: { stopped_hold_s: 0.6 } });
-    expect(r.removed[0]).toContain("삭제 불가");
+    expect(r.removed[0]).toContain("Cannot delete");
   });
 
   it("variant: 허용 키·불리언 처리", () => {

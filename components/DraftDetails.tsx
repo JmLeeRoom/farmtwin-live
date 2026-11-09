@@ -21,7 +21,7 @@ export function DraftDetails({ draft, changes, compact }: { draft: DraftView; ch
           ))}
         </ul>
       ) : (
-        <p className="text-xs text-slate-500">설정 변경 없음 — 현재 시나리오 그대로 진행 제안</p>
+        <p className="text-xs text-slate-500">No setting changes — proposes running the current scenario as is</p>
       )}
       {!compact && draft.rationale.length ? (
         <ul className="list-disc space-y-0.5 pl-5 text-xs text-slate-600">
@@ -32,13 +32,13 @@ export function DraftDetails({ draft, changes, compact }: { draft: DraftView; ch
       ) : null}
       {draft.out_of_scope.length ? (
         <div className="rounded-md bg-slate-50 px-2 py-1.5 text-xs text-slate-500">
-          <span className="font-semibold">범위 밖(반영 안 함): </span>
+          <span className="font-semibold">Out of scope (not applied): </span>
           {draft.out_of_scope.join(" · ")}
         </div>
       ) : null}
       {draft.questions.length ? (
         <div className="rounded-md bg-sky-50 px-2 py-1.5 text-xs text-sky-900">
-          <span className="font-semibold">에이전트 질문: </span>
+          <span className="font-semibold">Agent questions: </span>
           {draft.questions.join(" · ")}
         </div>
       ) : null}
@@ -56,7 +56,7 @@ export function ReviewDetails({ review }: { review: ReviewT }) {
   return (
     <div className="flex flex-col gap-1 rounded-lg border border-violet-200 bg-violet-50/50 p-2 text-xs">
       <div className="flex items-center gap-2">
-        <span className="font-semibold text-violet-900">검수 에이전트</span>
+        <span className="font-semibold text-violet-900">Review agent</span>
         <span className={`rounded px-1.5 py-0.5 font-bold ${review.verdict === "OK" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-900"}`}>
           {review.verdict}
         </span>

@@ -4,16 +4,15 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { participantKey, readLocal, writeLocal } from "@/lib/client";
 import { ROLE_LABEL } from "@/lib/constants";
-import { withRo } from "@/lib/format";
 import { getBrowserSupabase, supabaseConfigured } from "@/lib/supabase";
 import type { Role } from "@/lib/types";
 import { Centered, ConfigMissing } from "./SessionView";
 
 const ROLES: Role[] = ["safety", "reviewer", "developer"];
 const ROLE_HINT: Record<Role, string> = {
-  safety: "고령 작업자 구역·판정 기준 변경을 승인",
-  reviewer: "③ 검수 — 판정 근거를 확인하고 승인",
-  developer: "② 실행 — 재실행 요청을 승인",
+  safety: "Approves elderly-worker zones and threshold changes",
+  reviewer: "③ Review — checks the evidence and approves",
+  developer: "② Run — approves the run request",
 };
 const parseRole = (v: string | null): Role => (v === "developer" || v === "reviewer" || v === "safety" ? v : "safety");
 
@@ -60,7 +59,7 @@ export default function JoinClient() {
   }, [id, router]);
 
   if (!supabaseConfigured()) return <ConfigMissing />;
-  if (notFound) return <Centered>세션을 찾을 수 없습니다. QR을 다시 찍어 주세요.</Centered>;
+  if (notFound) return <Centered>Session not found. Scan the QR code again.</Centered>;
 
   const join = async () => {
     setBusy(true);
@@ -85,8 +84,8 @@ export default function JoinClient() {
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-5 px-4 py-8">
       <div>
-        <span className="text-sm font-bold text-emerald-700">FarmTwin Live · 세션 참가</span>
-        <h1 className="mt-1 text-2xl font-bold text-slate-900">{title ?? "세션을 불러오는 중…"}</h1>
+        <span className="text-sm font-bold text-emerald-700">FarmTwin Live · Join session</span>
+        <h1 className="mt-1 text-2xl font-bold text-slate-900">{title ?? "Loading the session…"}</h1>
       </div>
       <div className="flex flex-col gap-2">
         {ROLES.map((r) => (
@@ -105,7 +104,7 @@ export default function JoinClient() {
         ))}
       </div>
       <label className="flex flex-col gap-1">
-        <span className="text-sm font-semibold text-slate-700">이름</span>
+        <span className="text-sm font-semibold text-slate-700">Name</span>
         <input value={name} onChange={(e) => setName(e.target.value)} className="min-h-12 rounded-lg border border-slate-300 px-3 text-base" />
       </label>
       <button
@@ -114,9 +113,9 @@ export default function JoinClient() {
         disabled={busy || !title}
         className="min-h-14 rounded-xl bg-emerald-700 text-lg font-bold text-white hover:bg-emerald-800 disabled:bg-slate-300"
       >
-        {busy ? "참가 중…" : `${withRo(ROLE_LABEL[role])} 참가`}
+        {busy ? "Joining…" : `Join as ${ROLE_LABEL[role]}`}
       </button>
-      {error ? <p className="text-sm text-red-700">참가하지 못했습니다: {error}</p> : null}
+      {error ? <p className="text-sm text-red-700">Could not join: {error}</p> : null}
     </main>
   );
 }

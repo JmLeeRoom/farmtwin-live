@@ -53,16 +53,16 @@ export function sanitizeScenarioPatch(patch: unknown): Sanitized {
   if (!isPlainObject(patch)) return { patch: out, removed };
   for (const [path, value] of flatten(patch)) {
     if (!SCENARIO_ALLOWED_PATHS.has(path)) {
-      removed.push(`허용되지 않은 키: scenario.${path}`);
+      removed.push(`Key not allowed: scenario.${path}`);
       continue;
     }
     if (value === null || value === undefined) {
-      removed.push(`삭제 불가: scenario.${path}`);
+      removed.push(`Cannot delete: scenario.${path}`);
       continue;
     }
     const n = toNumber(value);
     if (n === null) {
-      removed.push(`숫자가 아님: scenario.${path}`);
+      removed.push(`Not a number: scenario.${path}`);
       continue;
     }
     setPath(out, path, n);
@@ -76,21 +76,21 @@ export function sanitizeVariantPatch(patch: unknown, id: VariantId): Sanitized {
   if (!isPlainObject(patch)) return { patch: out, removed };
   for (const [key, value] of Object.entries(patch)) {
     if (!VARIANT_ALLOWED_KEYS.has(key)) {
-      removed.push(`허용되지 않은 키: variants.${id}.${key}`);
+      removed.push(`Key not allowed: variants.${id}.${key}`);
       continue;
     }
     if (value === null || value === undefined) {
-      removed.push(`삭제 불가: variants.${id}.${key}`);
+      removed.push(`Cannot delete: variants.${id}.${key}`);
       continue;
     }
     if (key === "stop_latched") {
       if (typeof value === "boolean") out[key] = value;
       else if (value === "true" || value === "false") out[key] = value === "true";
-      else removed.push(`참/거짓 아님: variants.${id}.${key}`);
+      else removed.push(`Not true/false: variants.${id}.${key}`);
       continue;
     }
     const n = toNumber(value);
-    if (n === null) removed.push(`숫자가 아님: variants.${id}.${key}`);
+    if (n === null) removed.push(`Not a number: variants.${id}.${key}`);
     else out[key] = n;
   }
   return { patch: out, removed };
@@ -146,29 +146,29 @@ export const thresholdChanged = (changes: Change[]) =>
 /** 화면용 경로 이름 */
 export function changeLabel(path: string): string {
   const map: Record<string, string> = {
-    "scenario.corridor.width_m": "통로 폭",
-    "scenario.corridor.length_m": "통로 길이",
-    "scenario.obstacle.center_x_m": "장애물 중심 x",
-    "scenario.obstacle.length_x_m": "장애물 길이",
-    "scenario.obstacle.width_y_m": "장애물 폭",
-    "scenario.obstacle.height_m": "장애물 높이",
-    "scenario.requirements.min_front_gap_m": "판정 기준 · 최소 앞면 간격",
-    "scenario.requirements.stopped_speed_mps": "판정 기준 · 정지 속력",
-    "scenario.requirements.stopped_hold_s": "판정 기준 · 정지 유지",
-    "scenario.requirements.min_progress_m": "판정 기준 · 최소 진행",
-    "scenario.requirements.max_abs_y_m": "판정 기준 · 옆 벗어남",
-    "scenario.requirements.max_abs_yaw_rad": "판정 기준 · 방향 틀어짐",
-    worker_zone: "고령 작업자 구역",
+    "scenario.corridor.width_m": "Corridor width",
+    "scenario.corridor.length_m": "Corridor length",
+    "scenario.obstacle.center_x_m": "Obstacle center x",
+    "scenario.obstacle.length_x_m": "Obstacle length",
+    "scenario.obstacle.width_y_m": "Obstacle width",
+    "scenario.obstacle.height_m": "Obstacle height",
+    "scenario.requirements.min_front_gap_m": "Threshold · min front gap",
+    "scenario.requirements.stopped_speed_mps": "Threshold · stopped speed",
+    "scenario.requirements.stopped_hold_s": "Threshold · stop hold",
+    "scenario.requirements.min_progress_m": "Threshold · min progress",
+    "scenario.requirements.max_abs_y_m": "Threshold · max lateral offset",
+    "scenario.requirements.max_abs_yaw_rad": "Threshold · max yaw",
+    worker_zone: "Elderly-worker zone",
   };
   if (map[path]) return map[path];
   const m = path.match(/^variants\.([AB])\.(.+)$/);
   if (m) {
     const k: Record<string, string> = {
-      stop_sensor_distance_m: "정지 시작 거리",
-      target_speed_mps: "목표 속도",
-      stop_latched: "정지 유지(latch)",
+      stop_sensor_distance_m: "Stop trigger distance",
+      target_speed_mps: "Target speed",
+      stop_latched: "Stop latched",
     };
-    return `설정 ${m[1]} · ${k[m[2]] ?? m[2]}`;
+    return `Variant ${m[1]} · ${k[m[2]] ?? m[2]}`;
   }
   return path;
 }

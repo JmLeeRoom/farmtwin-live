@@ -53,28 +53,41 @@ export interface ReportData {
 
 export async function fetchSeed(): Promise<{ data: ReportData; text: string; sha256: string }> {
   const res = await fetch(SEED_URL, { cache: "force-cache" });
-  if (!res.ok) throw new Error(`시드 기록을 불러오지 못했습니다 (${res.status})`);
+  if (!res.ok) throw new Error(`Could not load the trial records (${res.status})`);
   const text = await res.text();
   return { data: JSON.parse(text) as ReportData, text, sha256: sha256Hex(text) };
 }
 
+/** The 2026-11-01 records carry Korean labels; the app shows English, so Korean text falls back to the English defaults. */
+const hasHangul = (s: unknown): boolean => typeof s === "string" && /[\uac00-\ud7a3]/.test(s);
+
 export function normalizeScenario(data: ReportData): ScenarioT {
   const crop = data.scenario.cropApplication ?? {};
+  const base = BASE_SCENARIO.crop_application;
   return {
     ...BASE_SCENARIO,
     crop_application: {
-      crop: crop.crop ?? BASE_SCENARIO.crop_application.crop,
-      task: crop.task ?? BASE_SCENARIO.crop_application.task,
-      exclusions: crop.exclusions ?? BASE_SCENARIO.crop_application.exclusions,
+      crop: crop.crop && !hasHangul(crop.crop) ? crop.crop : base.crop,
+      task: crop.task && !hasHangul(crop.task) ? crop.task : base.task,
+      exclusions: crop.exclusions && !crop.exclusions.some(hasHangul) ? crop.exclusions : base.exclusions,
     },
   };
+}
+
+/** English text for the evaluator's recorded verdict (the original stays in report-data.json). */
+export function englishReason(ev: { status: string; reasonCode: string; reason: string }, minFrontGapM: number): string {
+  if (!hasHangul(ev.reason)) return ev.reason;
+  const bar = BASE_SCENARIO.requirements.min_front_gap_m.toFixed(2);
+  if (ev.reasonCode === "REQUIREMENTS_MET") return "Recording, motion, sensor stop, stop hold, front gap and corridor requirements are all met.";
+  if (ev.reasonCode === "MIN_GAP_VIOLATION") return `Minimum front gap ${minFrontGapM.toFixed(4)} m is below the required ${bar} m.`;
+  return `${ev.status} · ${ev.reasonCode}`;
 }
 
 export function normalizeVariants(data: ReportData): Variants {
   const pick = (id: VariantId) => {
     const v = data.variants.find((x) => x.id === id);
     return {
-      name: v?.name ?? id,
+      name: v?.name && !hasHangul(v.name) ? v.name : id === "A" ? "Late stop" : "Early stop",
       stop_sensor_distance_m: Number(v?.config.stop_sensor_distance_m ?? (id === "A" ? 0.3 : 0.8)),
       target_speed_mps: Number(v?.config.target_speed_mps ?? 0.4),
       stop_latched: Boolean(v?.config.stop_latched ?? true),
@@ -101,7 +114,7 @@ export function summarizeSeed(data: ReportData, reportDataSha256: string): SeedS
       variantId: r.variantId,
       status: r.evaluation.status,
       reasonCode: r.evaluation.reasonCode,
-      reason: r.evaluation.reason,
+      reason: englishReason(r.evaluation, r.metrics.minFrontGapM),
       metrics: { ...r.metrics },
       rerunCommand: r.rerun?.command ?? null,
     };

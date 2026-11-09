@@ -9,9 +9,9 @@ export const WorkerZone = z
     y_min_m: z.coerce.number().min(-0.5).max(0.5),
     y_max_m: z.coerce.number().min(-0.5).max(0.5),
     rule: z.literal("STOP_ON_ENTRY").default("STOP_ON_ENTRY"),
-    note: z.string().default("시나리오 입력 · 사람 모델·동적 장애물 물리 미구현"),
+    note: z.string().default("Scenario input; human models and moving-obstacle physics are not implemented yet"),
   })
-  .refine((v) => v.x_min_m < v.x_max_m && v.y_min_m < v.y_max_m, { message: "worker_zone 범위 역전" });
+  .refine((v) => v.x_min_m < v.x_max_m && v.y_min_m < v.y_max_m, { message: "worker_zone bounds are inverted" });
 
 const Patch = z.record(z.string(), z.unknown());
 
@@ -87,6 +87,6 @@ export const ExplainRequest = z.object({
 export function extractJsonObject(text: string): unknown {
   const start = text.indexOf("{");
   const end = text.lastIndexOf("}");
-  if (start < 0 || end <= start) throw new Error("응답에 JSON 객체가 없습니다");
+  if (start < 0 || end <= start) throw new Error("No JSON object in the response");
   return JSON.parse(text.slice(start, end + 1));
 }

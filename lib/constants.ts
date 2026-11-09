@@ -21,15 +21,15 @@ export const BASE_SCENARIO: ScenarioT = {
     max_abs_yaw_rad: 0.05,
   },
   crop_application: {
-    crop: "딸기",
-    task: "수확상자 운반 보조",
+    crop: "Strawberry",
+    task: "Harvest-crate hauling assist",
     exclusions: [
-      "토경 고랑 주행",
-      "수확·작물 인식",
-      "적재·상하차",
-      "작업자 추종·동적 장애물",
-      "허리 숙임 감소 효과",
-      "실물 안전·성능 인증",
+      "Driving in soil furrows",
+      "Harvesting and crop recognition",
+      "Loading and unloading",
+      "Following workers and moving obstacles",
+      "Reduced bending (ergonomic effect)",
+      "Physical safety and performance certification",
     ],
   },
 };
@@ -60,9 +60,9 @@ export const VARIANT_ALLOWED_KEYS = new Set<string>([
 ]);
 
 export const ROLE_LABEL: Record<Role, string> = {
-  developer: "개발자",
-  reviewer: "검수자",
-  safety: "안전담당",
+  developer: "Developer",
+  reviewer: "Reviewer",
+  safety: "Safety lead",
 };
 
 export const ROLE_COLOR: Record<Role, string> = {
@@ -72,25 +72,25 @@ export const ROLE_COLOR: Record<Role, string> = {
 };
 
 export const STATE_LABEL: Record<SessionState, string> = {
-  drafting: "초안 작성 단계",
-  gate_scenario: "① 시나리오 승인 대기",
-  gate_run: "② 실행 승인 대기",
-  awaiting_run: "로컬 러너 실행 중",
-  gate_review: "③ 검수 승인 대기",
-  bundled: "완료 · Evidence Bundle 준비됨",
+  drafting: "Drafting",
+  gate_scenario: "① Awaiting scenario approval",
+  gate_run: "② Awaiting run approval",
+  awaiting_run: "Local runner running",
+  gate_review: "③ Awaiting review approval",
+  bundled: "Done · Evidence Bundle ready",
 };
 
 export const GATE_TITLE = {
-  scenario: "① 시나리오 승인",
-  run: "② 실행 승인",
-  review: "③ 검수 승인",
+  scenario: "① Scenario approval",
+  run: "② Run approval",
+  review: "③ Review approval",
 } as const;
 
 export const DEMO_REQUEST =
-  "내일 05:00 3번 집하통로에서 딸기 수확상자 운반 로봇 정지 시험을 한다. 정지 설정 A/B를 비교해서 진행할 시나리오 초안을 만들어 줘.";
-export const DEMO_STEER = "3번 통로는 어르신이 아침에 풀 뽑으러 나오신다. 그 구간에서는 반드시 멈춰야 한다.";
+  "Tomorrow at 05:00 we run a stop test for the strawberry crate-hauling robot in collection aisle 3. Draft a test scenario that compares stop settings A and B.";
+export const DEMO_STEER = "Elderly workers weed in aisle 3 every morning. The robot must always stop in that section.";
 
 export const OFFLINE_NOTICE =
-  "로컬 러너 오프라인 — 2026-11-01 기록(batch-20261101-081329)으로 검수를 진행합니다. 새 시나리오의 실행 결과가 아닙니다.";
+  "Local runner offline — this review uses the 2026-11-01 records (batch-20261101-081329). These are not results of the new scenario.";
 
-export const DEMO_LINE = "에이전트는 초안·설명·명령을 만들고, 판정은 규칙(evaluate.py)이, 승인은 사람이 한다.";
+export const DEMO_LINE = "The agent drafts. The rules (evaluate.py) judge. People approve.";

@@ -34,7 +34,7 @@ export default function SessionView() {
   }, [meId, id, router]);
 
   if (!supabaseConfigured()) return <ConfigMissing />;
-  if (!meId) return <Centered>참가 정보를 확인하는 중…</Centered>;
+  if (!meId) return <Centered>Checking your participant info…</Centered>;
   return <SessionInner id={id} meId={meId} initialRequest={search.get("req") ?? ""} />;
 }
 
@@ -125,10 +125,10 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
       if (e.type === "gate_opened") {
         const k = e.payload?.kind as GateKind;
         const role = e.payload?.required_role as Role | undefined;
-        push(`${GATE_TITLE[k] ?? "게이트"} 열림 — ${role ? ROLE_LABEL[role] : ""} 승인 대기`, "info");
+        push(`${GATE_TITLE[k] ?? "Gate"} opened — ${role ? `waiting for ${ROLE_LABEL[role]}` : "awaiting approval"}`, "info");
       }
-      if (e.type === "provider_switch") push(`제공자 전환: ${String(e.payload?.from)} → ${String(e.payload?.to)}`, "warn");
-      if (e.type === "agent_failed") push("에이전트 응답 없음 — 다시 시도하거나 사람이 진행합니다", "error");
+      if (e.type === "provider_switch") push(`Provider switch: ${String(e.payload?.from)} → ${String(e.payload?.to)}`, "warn");
+      if (e.type === "agent_failed") push("Agent did not respond — retry, or continue without it", "error");
     }
     seen.current = max;
   }, [data.events, data.loading, push]);
@@ -147,7 +147,7 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
         sb.from("events").select("*").eq("session_id", id).order("id").limit(5000),
       ]);
       const err = [ss, p, g, a, r, e].find((x) => x.error)?.error;
-      if (err || !ss.data) throw new Error(err?.message ?? "세션 없음");
+      if (err || !ss.data) throw new Error(err?.message ?? "Session not found");
       const bundle = buildBundle({
         session: ss.data as SessionRow,
         participants: (p.data ?? []) as ParticipantRow[],
@@ -174,10 +174,10 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
         actor_id: me.id,
         payload: { sha256: bundle.bundle_sha256, events_through_id: bundle.events_through_id },
       });
-      push(`Evidence Bundle 내려받음 · sha256 ${bundle.bundle_sha256.slice(0, 10)}`, "ok");
+      push(`Downloaded Evidence Bundle · sha256 ${bundle.bundle_sha256.slice(0, 10)}`, "ok");
       refresh();
     } catch (err) {
-      push(`Bundle을 만들지 못했습니다: ${err instanceof Error ? err.message : String(err)}`, "error");
+      push(`Could not build the bundle: ${err instanceof Error ? err.message : String(err)}`, "error");
     } finally {
       setExporting(false);
     }
@@ -186,14 +186,14 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
   if (data.notFound) {
     return (
       <Centered>
-        세션을 찾을 수 없습니다.{" "}
+        Session not found.{" "}
         <Link href="/" className="text-emerald-700 underline">
-          새 세션 만들기
+          Create a new session
         </Link>
       </Centered>
     );
   }
-  if (!s || !me) return <Centered>{data.error ? `불러오지 못했습니다: ${data.error}` : "세션을 불러오는 중…"}</Centered>;
+  if (!s || !me) return <Centered>{data.error ? `Could not load: ${data.error}` : "Loading the session…"}</Centered>;
 
   const header = (
     <SessionHeader
@@ -220,12 +220,12 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
       <ToastStack toasts={toasts} />
       {header}
       <div className="border-b border-emerald-100 bg-emerald-50 px-4 py-1.5 text-center text-xs text-emerald-900">{DEMO_LINE}</div>
-      {data.error ? <div className="bg-amber-100 px-4 py-1.5 text-center text-xs text-amber-900">연결 문제: {data.error} — 자동으로 다시 시도합니다</div> : null}
+      {data.error ? <div className="bg-amber-100 px-4 py-1.5 text-center text-xs text-amber-900">Connection problem: {data.error} — retrying automatically</div> : null}
 
       {isDesktop ? (
         <main className="mx-auto grid max-w-[1500px] grid-cols-12 gap-4 p-4">
           <section className="col-span-12 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 xl:col-span-5">
-            <SectionTitle title="시험 재생" note="실제 기록 · 판정은 evaluate.py" />
+            <SectionTitle title="Test replay" note="Real records · judged by evaluate.py" />
             {seed ? (
               <ReplayCanvas
                 seed={seed}
@@ -237,22 +237,22 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
                 meId={me.id}
               />
             ) : (
-              <p className="text-sm text-slate-500">{seedError ? `기록을 불러오지 못했습니다: ${seedError}` : "기록을 불러오는 중…"}</p>
+              <p className="text-sm text-slate-500">{seedError ? `Could not load the records: ${seedError}` : "Loading the records…"}</p>
             )}
             <ScenarioCard session={s} />
           </section>
           <section className="col-span-12 flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4 md:col-span-6 xl:col-span-4">
-            <SectionTitle title="에이전트 세션" note="초안 → 개입 → 재초안" />
+            <SectionTitle title="Agent session" note="draft → steer → re-draft" />
             <div className="max-h-[560px] overflow-y-auto pr-1">{timeline}</div>
             {steerBox}
           </section>
           <section className="col-span-12 flex flex-col gap-4 md:col-span-6 xl:col-span-3">
             <div className="flex flex-col gap-3 rounded-2xl border border-slate-200 bg-white p-4">
-              <SectionTitle title="승인 게이트" note="모든 화면에 동시에" />
+              <SectionTitle title="Approval gates" note="on every screen at once" />
               {gatePanel}
             </div>
             <div className="flex flex-col gap-2 rounded-2xl border border-slate-200 bg-white p-4">
-              <SectionTitle title="감사 로그" note="누가 언제 무엇을" />
+              <SectionTitle title="Audit log" note="who did what, when" />
               <AuditLog events={data.events} participants={data.participants} />
             </div>
           </section>
@@ -262,17 +262,17 @@ function SessionInner({ id, meId, initialRequest }: { id: string; meId: string; 
           {gatePanel}
           {steerBox}
           <details className="rounded-xl border border-slate-200 bg-white p-3" open>
-            <summary className="text-sm font-semibold text-slate-700">에이전트 타임라인</summary>
+            <summary className="text-sm font-semibold text-slate-700">Agent timeline</summary>
             <div className="mt-2">{timeline}</div>
           </details>
           <details className="rounded-xl border border-slate-200 bg-white p-3">
-            <summary className="text-sm font-semibold text-slate-700">현재 시나리오</summary>
+            <summary className="text-sm font-semibold text-slate-700">Current scenario</summary>
             <div className="mt-2">
               <ScenarioCard session={s} />
             </div>
           </details>
           <details className="rounded-xl border border-slate-200 bg-white p-3">
-            <summary className="text-sm font-semibold text-slate-700">감사 로그</summary>
+            <summary className="text-sm font-semibold text-slate-700">Audit log</summary>
             <div className="mt-2">
               <AuditLog events={data.events} participants={data.participants} />
             </div>
@@ -289,20 +289,20 @@ function ScenarioCard({ session }: { session: SessionRow }) {
   const v = session.variants;
   return (
     <div className="grid grid-cols-2 gap-x-4 gap-y-1 rounded-xl bg-slate-50 p-3 text-xs text-slate-700 sm:grid-cols-3">
-      <span>통로 {sc.corridor.length_m} × {sc.corridor.width_m} m</span>
-      <span>장애물 중심 x {sc.obstacle.center_x_m} m</span>
-      <span>판정 기준 ≥ {fmtM(sc.requirements.min_front_gap_m, 2)}</span>
+      <span>Corridor {sc.corridor.length_m} × {sc.corridor.width_m} m</span>
+      <span>Obstacle center x {sc.obstacle.center_x_m} m</span>
+      <span>Threshold ≥ {fmtM(sc.requirements.min_front_gap_m, 2)}</span>
       <span>
-        A 정지 시작 {fmtM(v.A.stop_sensor_distance_m, 2)} · {v.A.target_speed_mps} m/s
+        A stop trigger {fmtM(v.A.stop_sensor_distance_m, 2)} · {v.A.target_speed_mps} m/s
       </span>
       <span>
-        B 정지 시작 {fmtM(v.B.stop_sensor_distance_m, 2)} · {v.B.target_speed_mps} m/s
+        B stop trigger {fmtM(v.B.stop_sensor_distance_m, 2)} · {v.B.target_speed_mps} m/s
       </span>
       <span className={session.worker_zone ? "font-semibold text-amber-800" : "text-slate-400"}>
-        작업자 구역 {session.worker_zone ? fmtValue(session.worker_zone) : "없음"}
+        Worker zone {session.worker_zone ? fmtValue(session.worker_zone) : "none"}
       </span>
       <span className="col-span-full text-[11px] text-slate-500">
-        {sc.crop_application.crop} · {sc.crop_application.task} · 설계 가정(현장 실측 전) · 제외: {sc.crop_application.exclusions.join(", ")}
+        {sc.crop_application.crop} · {sc.crop_application.task} · design assumptions (not field-measured) · excluded: {sc.crop_application.exclusions.join(", ")}
       </span>
     </div>
   );
@@ -324,7 +324,7 @@ export function Centered({ children }: { children: React.ReactNode }) {
 export function ConfigMissing() {
   return (
     <Centered>
-      Supabase 환경변수(NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_ANON_KEY)가 없습니다. .env.local 또는 Vercel 환경변수를 넣고 다시 시작하세요.
+      Supabase environment variables (NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY) are missing. Add them to .env.local or Vercel and restart.
     </Centered>
   );
 }

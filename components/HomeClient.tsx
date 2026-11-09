@@ -11,8 +11,8 @@ import { getBrowserSupabase, supabaseConfigured } from "@/lib/supabase";
 export default function HomeClient() {
   const router = useRouter();
   const search = useSearchParams();
-  const [title, setTitle] = useState("딸기 수확상자 운반 로봇 · 3번 집하통로 정지 시험");
-  const [name, setName] = useState("개발자");
+  const [title, setTitle] = useState("Strawberry crate-hauling robot · aisle 3 stop test");
+  const [name, setName] = useState("Developer");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const configured = supabaseConfigured();
@@ -27,7 +27,7 @@ export default function HomeClient() {
       const s = await sb
         .from("sessions")
         .insert({
-          title: title.trim() || "FarmTwin Live 세션",
+          title: title.trim() || "FarmTwin Live session",
           seed_batch_id: SEED_BATCH_DIR,
           scenario: summary.initial.scenario,
           variants: summary.initial.variants,
@@ -39,7 +39,7 @@ export default function HomeClient() {
       const sid = s.data.id as string;
       const p = await sb
         .from("participants")
-        .insert({ session_id: sid, name: name.trim() || "개발자", role: "developer" })
+        .insert({ session_id: sid, name: name.trim() || "Developer", role: "developer" })
         .select("id")
         .single();
       if (p.error) throw new Error(p.error.message);
@@ -70,19 +70,19 @@ export default function HomeClient() {
       <div className="flex flex-col gap-3">
         <span className="text-sm font-bold tracking-wide text-emerald-700">FarmTwin Live</span>
         <h1 className="text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">
-          농장 로봇이 밭에 들어가기 전,
+          Before a farm robot enters the field,
           <br />
-          관련된 모든 사람이 같은 검증 세션에서 승인한다.
+          everyone who owns the risk signs off in one live session.
         </h1>
         <p className="text-slate-600">
-          설계 에이전트가 시험 시나리오 초안을 쓰고, 개발자·안전담당·검수자가 실시간으로 들어와 개입하고 승인합니다. 결과는 실제 Webots 기록(2026-11-01)으로 재생하고, 승인 기록과 모델 출처를 Evidence Bundle로 남깁니다.
+          A design agent drafts the test scenario; the developer, the safety lead and the reviewer join live to steer it and approve it. Results replay from real Webots records (2026-11-01), and every approval and model call is kept in an Evidence Bundle.
         </p>
         <p className="rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-900">{DEMO_LINE}</p>
       </div>
 
       {!configured ? (
         <p className="rounded-lg bg-amber-100 px-4 py-3 text-sm text-amber-950">
-          Supabase 환경변수가 없습니다. <code>.env.local</code>에 NEXT_PUBLIC_SUPABASE_URL·NEXT_PUBLIC_SUPABASE_ANON_KEY를 넣고 dev 서버를 다시 시작하세요.
+          Supabase environment variables are missing. Add NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY to <code>.env.local</code> and restart the dev server.
         </p>
       ) : null}
 
@@ -94,11 +94,11 @@ export default function HomeClient() {
         }}
       >
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-slate-700">세션 제목</span>
+          <span className="text-sm font-semibold text-slate-700">Session title</span>
           <input value={title} onChange={(e) => setTitle(e.target.value)} className="rounded-lg border border-slate-300 px-3 py-2" />
         </label>
         <label className="flex flex-col gap-1">
-          <span className="text-sm font-semibold text-slate-700">내 이름 (개발자 · 소유자)</span>
+          <span className="text-sm font-semibold text-slate-700">Your name (developer · owner)</span>
           <input value={name} onChange={(e) => setName(e.target.value)} className="rounded-lg border border-slate-300 px-3 py-2" />
         </label>
         <button
@@ -106,17 +106,17 @@ export default function HomeClient() {
           disabled={busy || !configured}
           className="min-h-12 rounded-lg bg-emerald-700 px-4 text-base font-bold text-white hover:bg-emerald-800 disabled:bg-slate-300"
         >
-          {busy ? "세션 만드는 중…" : "세션 만들기"}
+          {busy ? "Creating session…" : "Create session"}
         </button>
-        {error ? <p className="text-sm text-red-700">세션을 만들지 못했습니다: {error}</p> : null}
+        {error ? <p className="text-sm text-red-700">Could not create the session: {error}</p> : null}
       </form>
 
       <div className="flex flex-wrap gap-4 text-sm text-slate-500">
         <Link href="/replay" className="underline hover:text-slate-800">
-          세션 없이 기록 재생만 보기
+          Just replay the records (no session)
         </Link>
         <a href="/api/health?ping=1" className="underline hover:text-slate-800">
-          연결 점검(/api/health?ping=1)
+          Connection check (/api/health?ping=1)
         </a>
       </div>
     </main>

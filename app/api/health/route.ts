@@ -25,7 +25,7 @@ export async function GET(request: Request) {
   const ping = new URL(request.url).searchParams.get("ping") === "1";
   const env = Object.fromEntries(ENV_KEYS.map((k) => [k, Boolean(process.env[k])]));
 
-  let supabase: { ok: boolean; error?: string } = { ok: false, error: "env 없음" };
+  let supabase: { ok: boolean; error?: string } = { ok: false, error: "env missing" };
   if (supabaseConfigured()) {
     const r = await getServerSupabase().from("sessions").select("id", { count: "exact", head: true });
     supabase = r.error ? { ok: false, error: r.error.message } : { ok: true };
@@ -58,6 +58,6 @@ export async function GET(request: Request) {
     env,
     drafter_order: drafters.map((e) => e.label),
     providers: result,
-    hint: ping ? undefined : "?ping=1 을 붙이면 제공자마다 실제 호출로 연결을 확인합니다",
+    hint: ping ? undefined : "Add ?ping=1 to call each provider once and check the connection",
   });
 }

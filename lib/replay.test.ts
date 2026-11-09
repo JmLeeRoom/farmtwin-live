@@ -57,3 +57,15 @@ describe("T1 replay", () => {
     expect(s.initial.variants.B.stop_sensor_distance_m).toBe(0.8);
   });
 });
+
+describe("seed summary in English", () => {
+  it("records' Korean labels and verdicts are shown in English", () => {
+    const s = summarizeSeed(seed, "x");
+    expect(s.initial.variants.A.name).toBe("Late stop");
+    expect(s.initial.variants.B.name).toBe("Early stop");
+    expect(s.initial.scenario.crop_application.crop).toBe("Strawberry");
+    expect(s.runs[RUN_A01].reason).toBe("Minimum front gap 0.2226 m is below the required 0.40 m.");
+    expect(s.runs[RUN_B01].reason).toMatch(/requirements are all met/);
+    expect(s.runs[RUN_A01].reasonCode).toBe("MIN_GAP_VIOLATION");
+  });
+});

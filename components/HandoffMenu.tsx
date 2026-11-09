@@ -25,7 +25,7 @@ export default function HandoffMenu({ sessionId, me, participants, online, onDon
     const sb = getBrowserSupabase();
     const r = await sb.from("sessions").update({ owner_participant_id: to.id }).eq("id", sessionId).eq("owner_participant_id", me.id).select("id");
     if (r.error || !r.data?.length) {
-      onDone("인계하지 못했습니다(이미 소유자가 바뀌었을 수 있음)", "error");
+      onDone("Could not hand off (the owner may have changed already)", "error");
     } else {
       await sb.from("events").insert({
         session_id: sessionId,
@@ -34,7 +34,7 @@ export default function HandoffMenu({ sessionId, me, participants, online, onDon
         actor_id: me.id,
         payload: { from: me.id, to: to.id, to_name: to.name, to_role: to.role },
       });
-      onDone(`${to.name}(${ROLE_LABEL[to.role]})에게 세션을 넘겼습니다`, "ok");
+      onDone(`Handed the session to ${to.name} (${ROLE_LABEL[to.role]})`, "ok");
     }
     setBusy(false);
     setOpen(false);
@@ -43,11 +43,11 @@ export default function HandoffMenu({ sessionId, me, participants, online, onDon
   return (
     <div className="relative">
       <button type="button" onClick={() => setOpen((o) => !o)} className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-3 md:py-1.5 md:text-sm">
-        인계
+        Hand off
       </button>
       {open ? (
         <div className="absolute right-0 z-40 mt-1 w-64 rounded-lg border border-slate-200 bg-white p-1 shadow-lg">
-          {others.length === 0 ? <p className="px-3 py-2 text-sm text-slate-500">넘겨받을 참가자가 없습니다</p> : null}
+          {others.length === 0 ? <p className="px-3 py-2 text-sm text-slate-500">No one to hand off to</p> : null}
           {others.map((p) => (
             <button
               key={p.id}
@@ -59,7 +59,7 @@ export default function HandoffMenu({ sessionId, me, participants, online, onDon
               <span>
                 {p.name} <span className="text-slate-500">· {ROLE_LABEL[p.role]}</span>
               </span>
-              <span className={`text-xs ${online[p.id] ? "text-emerald-600" : "text-slate-400"}`}>{online[p.id] ? "온라인" : "오프라인"}</span>
+              <span className={`text-xs ${online[p.id] ? "text-emerald-600" : "text-slate-400"}`}>{online[p.id] ? "online" : "offline"}</span>
             </button>
           ))}
         </div>

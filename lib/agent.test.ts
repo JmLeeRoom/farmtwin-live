@@ -116,7 +116,7 @@ const fakeLLM =
   (opts: { failLabels?: string[]; reviewBlock?: boolean } = {}): CallFn =>
   async (e, instructions, prompt) => {
     if (opts.failLabels?.includes(e.label)) throw Object.assign(new Error("down"), { statusCode: 503 });
-    if (instructions.includes("검수 에이전트")) {
+    if (instructions.includes("review agent")) {
       return {
         text: JSON.stringify({
           verdict: opts.reviewBlock ? "NEEDS_CHANGE" : "OK",
@@ -128,10 +128,10 @@ const fakeLLM =
         outputTokens: 1,
       };
     }
-    if (instructions.includes("설명 에이전트")) {
+    if (instructions.includes("explainer agent")) {
       return { text: JSON.stringify({ headline: "B PASS", bullets: ["b"], quoted: { status: "PASS", reason: "r", reasons: [] } }), inputTokens: 1, outputTokens: 1 };
     }
-    const req = prompt.split("[요청]")[1] ?? "";
+    const req = prompt.split("[Request]")[1] ?? "";
     const wantsZone = prompt.includes("어르신");
     const wantsSlow = req.includes("속도");
     const noop = prompt.includes("그대로");
@@ -318,7 +318,7 @@ describe("pickRunId", () => {
     const ids = [RUN_A01, RUN_B01];
     expect(pickRunId(RUN_A01, ids).id).toBe(RUN_A01);
     expect(pickRunId("run-A-01", ids).id).toBe(RUN_A01);
-    expect(pickRunId("run-A-09-zzz", ids)).toEqual({ id: RUN_A01, note: expect.stringContaining("요청한 run id 없음") });
+    expect(pickRunId("run-A-09-zzz", ids)).toEqual({ id: RUN_A01, note: expect.stringContaining("Requested run id not found") });
     expect(pickRunId(null, ids).id).toBe(RUN_B01);
   });
 });

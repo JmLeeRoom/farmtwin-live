@@ -146,11 +146,11 @@ export default function ReplayCanvas({ seed, workerZone, inputMinGap, cursorOut,
             ))}
           </select>
         </label>
-        <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-slate-600">실제 기록 · 2026-11-01 · Webots R2025a</span>
+        <span className="ml-auto rounded bg-slate-100 px-2 py-1 text-slate-600">Real records · 2026-11-01 · Webots R2025a</span>
       </div>
 
       <div ref={wrapRef} className="w-full overflow-hidden rounded-lg border border-slate-200 bg-white">
-        <canvas ref={canvasRef} style={{ width: `${width}px`, height: `${height}px` }} aria-label="A/B 정지 시험 재생" role="img" />
+        <canvas ref={canvasRef} style={{ width: `${width}px`, height: `${height}px` }} aria-label="A/B stop test replay" role="img" />
       </div>
 
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
@@ -185,7 +185,7 @@ export default function ReplayCanvas({ seed, workerZone, inputMinGap, cursorOut,
             setT(v);
           }}
           className="w-full accent-emerald-700"
-          aria-label="재생 위치"
+          aria-label="Playback position"
         />
       </div>
 
@@ -196,7 +196,7 @@ export default function ReplayCanvas({ seed, workerZone, inputMinGap, cursorOut,
           disabled={follow}
           className="rounded-md bg-emerald-700 px-3 py-1.5 font-semibold text-white hover:bg-emerald-800 disabled:opacity-40"
         >
-          {playing ? "일시정지" : t >= dur ? "다시 재생" : "재생"}
+          {playing ? "Pause" : t >= dur ? "Replay" : "Play"}
         </button>
         <div className="flex overflow-hidden rounded-md border border-slate-300">
           {SPEEDS.map((s) => (
@@ -217,12 +217,12 @@ export default function ReplayCanvas({ seed, workerZone, inputMinGap, cursorOut,
         <div className="ml-auto flex items-center gap-3 text-xs text-slate-600">
           {canBroadcast && cursorOut ? (
             <label className="flex items-center gap-1">
-              <input type="checkbox" checked={broadcast} onChange={(e) => setBroadcast(e.target.checked)} /> 모두에게 따라보기 방송
+              <input type="checkbox" checked={broadcast} onChange={(e) => setBroadcast(e.target.checked)} /> Broadcast to everyone
             </label>
           ) : null}
           {!canBroadcast && cursorIn ? (
             <label className="flex items-center gap-1">
-              <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> 소유자 화면 따라보기
+              <input type="checkbox" checked={follow} onChange={(e) => setFollow(e.target.checked)} /> Follow the owner’s screen
             </label>
           ) : null}
         </div>
@@ -252,11 +252,11 @@ function Readout({ run, t }: { run: SeedRun; t: number }) {
       <div className="grid grid-cols-3 gap-1 tabular-nums text-slate-700">
         <span>t {p?.simTime.toFixed(2)} s</span>
         <span>v {p?.speedMps.toFixed(2)} m/s</span>
-        <span>간격 {p?.frontGapM.toFixed(3)} m</span>
+        <span>gap {p?.frontGapM.toFixed(3)} m</span>
       </div>
       {done ? (
         <div className="mt-1 text-slate-600">
-          최소 앞면 간격 <b className="tabular-nums">{run.metrics.minFrontGapM.toFixed(3)} m</b> · 기준 ≥ 0.40 m
+          min front gap <b className="tabular-nums">{run.metrics.minFrontGapM.toFixed(3)} m</b> · threshold ≥ 0.40 m
         </div>
       ) : null}
     </div>
@@ -283,7 +283,7 @@ function drawLane(
   ctx.fillStyle = "#334155";
   ctx.textBaseline = "alphabetic";
   ctx.fillText(
-    `${run.variantId} · ${run.variantId === "A" ? "늦은 정지(센서 0.30 m)" : "이른 정지(센서 0.80 m)"} · ${runLabel(run.id)}`,
+    `${run.variantId} · ${run.variantId === "A" ? "late stop (sensor 0.30 m)" : "early stop (sensor 0.80 m)"} · ${runLabel(run.id)}`,
     v.pad,
     top + 16,
   );
@@ -324,7 +324,7 @@ function drawLane(
     ctx.setLineDash([]);
     ctx.fillStyle = "#92400e";
     ctx.font = "600 11px system-ui, -apple-system, 'Malgun Gothic', sans-serif";
-    ctx.fillText("고령 작업자 구역 · 입력", zx0 + 4, zy0 + 13);
+    ctx.fillText("Elderly-worker zone · input", zx0 + 4, zy0 + 13);
   }
 
   // 기준선: 로봇 앞면이 넘으면 안 되는 위치
@@ -343,9 +343,9 @@ function drawLane(
     ctx.font = "11px system-ui, -apple-system, 'Malgun Gothic', sans-serif";
     ctx.fillText(label, lx + 3, ly1 - 4 - dy);
   };
-  drawLimit(minGap, "#b91c1c", `기준 ${minGap.toFixed(2)} m`, 0);
+  drawLimit(minGap, "#b91c1c", `threshold ${minGap.toFixed(2)} m`, 0);
   if (inputMinGap !== undefined && Math.abs(inputMinGap - minGap) > 1e-9) {
-    drawLimit(inputMinGap, "#7c3aed", `새 기준 ${inputMinGap.toFixed(2)} m(입력)`, 12);
+    drawLimit(inputMinGap, "#7c3aed", `new threshold ${inputMinGap.toFixed(2)} m (input)`, 12);
   }
   ctx.setLineDash([]);
 
@@ -359,7 +359,7 @@ function drawLane(
   ctx.strokeRect(ox0, oy0, ox1 - ox0, oy1 - oy0);
   ctx.fillStyle = "#fff";
   ctx.font = "600 11px system-ui, -apple-system, 'Malgun Gothic', sans-serif";
-  ctx.fillText("장애물", ox0 + 6, (oy0 + oy1) / 2 + 4);
+  ctx.fillText("Obstacle", ox0 + 6, (oy0 + oy1) / 2 + 4);
 
   // 로봇
   const p = run.trajectory[indexAt(run.trajectory, t)];

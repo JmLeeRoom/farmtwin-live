@@ -40,7 +40,7 @@ export function pickRunId(requested: string | null, runIds: string[]): { id: str
   const variant = requested?.match(/run-([AB])-/)?.[1] ?? "B";
   const id =
     runIds.find((r) => r.startsWith(`run-${variant}-01-`)) ?? runIds.find((r) => r.startsWith("run-B-01-")) ?? runIds[0] ?? RUN_B01;
-  return { id, note: requested ? `요청한 run id 없음(${requested}) → ${id.slice(0, 9)} 회차` : null };
+  return { id, note: requested ? `Requested run id not found (${requested}) → using ${id.slice(0, 9)}` : null };
 }
 
 function steerLines(steers: EventRow[], participants: ParticipantRow[], consumedUpTo: number): SteerLine[] {
@@ -49,7 +49,7 @@ function steerLines(steers: EventRow[], participants: ParticipantRow[], consumed
     const p = e.actor_id ? byId.get(e.actor_id) : undefined;
     const time = new Date(e.created_at).toLocaleTimeString("ko-KR", { hour: "2-digit", minute: "2-digit", timeZone: "Asia/Seoul" });
     return {
-      name: p?.name ?? String(e.payload?.name ?? "참가자"),
+      name: p?.name ?? String(e.payload?.name ?? "Participant"),
       role: (p?.role ?? (e.payload?.role as Role | undefined)) ?? null,
       time,
       text: String(e.payload?.text ?? ""),
@@ -81,7 +81,7 @@ export async function runDraft(deps: AgentDeps, input: { sessionId: string; trig
     await db.insertEvent(sessionId, { type: "agent_started", actor_kind: "agent", actor_id: "drafter", payload: { trigger, input_ids: consumedIds } });
 
     if (deps.drafters.length === 0) {
-      await db.insertEvent(sessionId, { type: "agent_failed", actor_kind: "system", actor_id: "system", payload: { errors: [{ label: "config", message: "설정된 LLM 제공자가 없습니다(.env)" }] } });
+      await db.insertEvent(sessionId, { type: "agent_failed", actor_kind: "system", actor_id: "system", payload: { errors: [{ label: "config", message: "No LLM provider is configured (.env)" }] } });
       return { status: 502, body: { ok: false, reason: "no_provider" } };
     }
 
@@ -219,7 +219,7 @@ export async function runDraft(deps: AgentDeps, input: { sessionId: string; trig
 
     const fresh = await db.getSession(sessionId);
     if (!fresh || !DRAFTABLE.has(fresh.state)) {
-      await db.insertEvent(sessionId, { type: "draft_discarded", actor_kind: "system", actor_id: "system", payload: { reason: "그사이 다음 단계로 넘어갔습니다", state: fresh?.state } });
+      await db.insertEvent(sessionId, { type: "draft_discarded", actor_kind: "system", actor_id: "system", payload: { reason: "the session moved to the next step in the meantime", state: fresh?.state } });
       return { status: 409, body: { ok: false, reason: "state_changed" } };
     }
 
@@ -248,7 +248,7 @@ export async function runDraft(deps: AgentDeps, input: { sessionId: string; trig
       });
     } catch (err) {
       if (err instanceof UniqueViolation) {
-        await db.insertEvent(sessionId, { type: "draft_discarded", actor_kind: "system", actor_id: "system", payload: { reason: "다른 게이트가 진행 중입니다" } });
+        await db.insertEvent(sessionId, { type: "draft_discarded", actor_kind: "system", actor_id: "system", payload: { reason: "another gate is in progress" } });
         return { status: 409, body: { ok: false, reason: "pending_gate_exists" } };
       }
       throw err;

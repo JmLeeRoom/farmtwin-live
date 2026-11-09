@@ -116,7 +116,7 @@ export function describeError(err: unknown, env: Env = process.env): string {
   if (e?.responseBody) msg += ` · ${e.responseBody.slice(0, 160)}`;
   for (const k of ["CODYSSEY_DRAFT_KEY", "CODYSSEY_REVIEW_KEY", "ANTHROPIC_API_KEY", "GOOGLE_GENERATIVE_AI_API_KEY"]) {
     const v = env[k];
-    if (v && v.length > 6) msg = msg.split(v).join("[키]");
+    if (v && v.length > 6) msg = msg.split(v).join("[key]");
   }
   return msg.slice(0, 400);
 }
@@ -135,7 +135,7 @@ export interface StructuredResult<T> {
 
 export class AllProvidersFailed extends Error {
   constructor(public errors: Array<{ label: string; message: string }>) {
-    super(errors.length ? errors.map((e) => `${e.label}: ${e.message}`).join(" | ") : "설정된 LLM 제공자가 없습니다");
+    super(errors.length ? errors.map((e) => `${e.label}: ${e.message}`).join(" | ") : "No LLM provider is configured");
   }
 }
 
@@ -165,7 +165,7 @@ export async function runStructured<S extends z.ZodTypeAny>(p: {
     let prompt = p.prompt;
     for (let attempt = 0; attempt < 2; attempt++) {
       if (Date.now() - started > budgetMs) {
-        errors.push({ label: entry.label, message: "시간 예산 초과" });
+        errors.push({ label: entry.label, message: "Time budget exceeded" });
         break;
       }
       let res: TextResult;
@@ -190,7 +190,7 @@ export async function runStructured<S extends z.ZodTypeAny>(p: {
         };
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
-        errors.push({ label: entry.label, message: `스키마 오류: ${message.slice(0, 200)}` });
+        errors.push({ label: entry.label, message: `Schema error: ${message.slice(0, 200)}` });
         prompt = p.prompt + retrySuffix(message);
       }
     }
