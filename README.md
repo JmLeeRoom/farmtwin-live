@@ -12,6 +12,8 @@
 
 명세: [docs/SPEC.md](docs/SPEC.md) · 엣지케이스 §20 · gstack 순서 §18
 
+**In English** — FarmTwin Live is a multiplayer AI verification session for farm robots (YC RFS Fall 2026 · Multiplayer AI). A design agent drafts the stop-test scenario; the developer, the safety lead and the reviewer join from laptop or phone (QR), steer the agent in real time (e.g. "elderly workers weed in aisle 3 every morning" → a stop-on-entry worker zone), and approve three gates — scenario, run, review — that appear on every screen at once and commit atomically in Postgres. Results replay from real Webots records (2026-11-01, 10 runs), pass/fail stays with the rule-based evaluator, and every approval, model call (provider · model · prompt/response hashes) and input hash is exported as a sha256-sealed Evidence Bundle. Stack: Next.js 16 · Supabase (Realtime + plpgsql gate function) · Vercel AI SDK v7 with provider fallback (Codyssey → Claude API).
+
 ---
 
 ## 1. Windows에서 실행 (PowerShell)
@@ -61,7 +63,7 @@ npm run typecheck; npm run lint; npm test; npm run build
 
 Import → **Production Branch = main** → `.env.example`의 변수를 Environment Variables에 → Deploy. 데모와 QR은 **프로덕션 URL**로 한다(프리뷰 URL은 Vercel 로그인 보호 때문에 심사위원 폰에서 안 열린다).
 
-브랜치: `main`은 뼈대(+ `.gstack/pregate.json`), 구현은 `live`. gstack은 `live`에서 `/review` → `/ship`(PR) → 처음 1회 `/setup-deploy` → `/land-and-deploy`(병합·프로덕션 배포·헬스체크).
+브랜치: `main` = 제출·배포본(전체 구현). 이후 수정은 새 브랜치에서 → gstack `/review` → `/ship`(PR) → 처음 1회 `/setup-deploy` → `/land-and-deploy`(병합·프로덕션 배포·헬스체크). 커밋 이력은 뼈대 → 블록 A~D → 점검 반영 순서.
 
 ## 7. 로컬 러너 (선택)
 
