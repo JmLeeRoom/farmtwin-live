@@ -134,7 +134,8 @@ export async function runDraft(deps: AgentDeps, input: { sessionId: string; trig
       scenario_patch: sp.patch,
       variant_patches: { A: va.patch, B: vb.patch },
     };
-    const noChange = changes.length === 0 && trigger !== "request";
+    // 변경 없는 개입은 열려 있는 ①을 그대로 둔다. 열린 ①이 없으면(반려 직후 등) 같은 내용이라도 ①을 다시 열어 흐름이 멈추지 않게 한다.
+    const noChange = changes.length === 0 && trigger !== "request" && s.state === "gate_scenario";
     const actor = `drafter:${res.entry.label}/${res.entry.modelId}`;
 
     const step = await db.insertAgentStep(sessionId, {

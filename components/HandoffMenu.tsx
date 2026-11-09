@@ -42,7 +42,7 @@ export default function HandoffMenu({ sessionId, me, participants, online, onDon
 
   return (
     <div className="relative">
-      <button type="button" onClick={() => setOpen((o) => !o)} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+      <button type="button" onClick={() => setOpen((o) => !o)} className="rounded-md border border-slate-300 px-2.5 py-1 text-xs font-medium text-slate-700 hover:bg-slate-50 md:px-3 md:py-1.5 md:text-sm">
         인계
       </button>
       {open ? (

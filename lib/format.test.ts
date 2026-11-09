@@ -50,3 +50,17 @@ describe("format", () => {
     expect(timeHMS("2026-11-09T04:05:06.000Z")).toBe("13:05:06");
   });
 });
+
+describe("조사", () => {
+  it("받침에 맞는 으로/로·을/를", async () => {
+    const { withRo, withEul } = await import("./format");
+    expect(withRo("안전담당")).toBe("안전담당으로");
+    expect(withRo("검수자")).toBe("검수자로");
+    expect(withRo("개발자")).toBe("개발자로");
+    expect(withRo("서울")).toBe("서울로");
+    expect(withEul("B-01")).toBe("B-01을");
+    expect(withEul("A-02")).toBe("A-02를");
+    expect(withEul("보관 입력")).toBe("보관 입력을");
+    expect(withRo("run")).toBe("run(으)로");
+  });
+});

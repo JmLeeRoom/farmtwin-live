@@ -28,10 +28,10 @@ export function fmtValue(v: unknown): string {
 export function whoOf(e: EventRow, byId: Map<string, ParticipantRow>): string {
   if (e.actor_kind === "human" && e.actor_id) {
     const p = byId.get(e.actor_id);
-    if (p) return `${p.name}(${ROLE_LABEL[p.role]})`;
+    if (p) return p.name === ROLE_LABEL[p.role] ? p.name : `${p.name}(${ROLE_LABEL[p.role]})`;
     const name = e.payload?.name ? String(e.payload.name) : "참가자";
     const role = e.payload?.role ? ROLE_LABEL[e.payload.role as Role] : null;
-    return role ? `${name}(${role})` : name;
+    return role && role !== name ? `${name}(${role})` : name;
   }
   if (e.actor_kind === "agent") {
     const a = e.actor_id ?? "agent";
@@ -96,4 +96,27 @@ export function describeEvent(e: EventRow): string {
     default:
       return e.type;
   }
+}
+
+/** 마지막 글자의 받침: -1 알 수 없음 · 0 없음 · 8 ㄹ · 그 밖은 받침 있음. 숫자는 한국어 읽기(영·일·이·삼…)로 본다. */
+function finalJong(word: string): number {
+  const ch = word.trim().slice(-1);
+  if (!ch) return -1;
+  const digit = "0123456789".indexOf(ch);
+  if (digit >= 0) return [21, 8, 0, 16, 0, 0, 1, 8, 8, 0][digit];
+  const c = ch.charCodeAt(0);
+  if (c < 0xac00 || c > 0xd7a3) return -1;
+  return (c - 0xac00) % 28;
+}
+
+/** '으로'/'로' (받침 없음·ㄹ받침 → 로) */
+export function withRo(word: string): string {
+  const j = finalJong(word);
+  return `${word}${j < 0 ? "(으)로" : j === 0 || j === 8 ? "로" : "으로"}`;
+}
+
+/** '을'/'를' */
+export function withEul(word: string): string {
+  const j = finalJong(word);
+  return `${word}${j < 0 ? "을(를)" : j === 0 ? "를" : "을"}`;
 }

@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { GATE_TITLE, ROLE_LABEL, RUN_A01, RUN_B01, SEED_BASE } from "@/lib/constants";
-import { fmtM, fmtValue, timeHMS } from "@/lib/format";
+import { fmtM, fmtValue, timeHMS, withEul } from "@/lib/format";
 import { fallbackExplain } from "@/lib/prompts";
 import { foldCommand, runLabel } from "@/lib/seed";
 import { shortHash } from "@/lib/sha";
@@ -74,7 +74,7 @@ export default function GatePanel({ session, gates, participants, online, me, is
                 {g.override ? <span className="rounded bg-amber-100 px-1.5 py-0.5 text-amber-900">대리·지적 확인</span> : null}
                 {who ? (
                   <span className="text-slate-600">
-                    {who.name}({ROLE_LABEL[who.role]})
+                    {who.name === ROLE_LABEL[who.role] ? who.name : `${who.name}(${ROLE_LABEL[who.role]})`}
                   </span>
                 ) : null}
                 {g.decision_comment && !superseded ? <span className="text-slate-500">“{g.decision_comment}”</span> : null}
@@ -245,7 +245,7 @@ function ReviewBody({ gate, session, isDesktop }: { gate: GateRow; session: Sess
       {p.notice ? <div className="rounded-lg bg-amber-100 px-3 py-2 text-xs font-semibold text-amber-950">{p.notice}</div> : null}
       {p.source === "rerun" ? (
         <div className="rounded-lg bg-sky-100 px-3 py-2 text-xs font-semibold text-sky-950">
-          로컬 러너가 {p.from_run_id ? runLabel(p.from_run_id) : "보관 입력"}을 Webots로 방금 재실행한 결과입니다(보관 입력 그대로 · 새 시나리오 실행 아님).
+          로컬 러너가 {withEul(p.from_run_id ? runLabel(p.from_run_id) : "보관 입력")} Webots로 방금 재실행한 결과입니다(보관 입력 그대로 · 새 시나리오 실행 아님).
         </div>
       ) : null}
       {digest ? (

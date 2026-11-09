@@ -3,6 +3,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useSyncExternalStore } from "react";
 import { ROLE_LABEL } from "@/lib/constants";
+import { withRo } from "@/lib/format";
 import type { Role } from "@/lib/types";
 
 const subscribe = () => () => {};
@@ -32,7 +33,7 @@ export default function JoinQR({ sessionId, onClose }: { sessionId: string; onCl
             const url = `${origin}/s/${sessionId}/join?role=${role}`;
             return (
               <div key={role} className="flex flex-col items-center gap-2 rounded-xl border border-slate-200 p-3">
-                <span className="text-sm font-semibold text-slate-800">{ROLE_LABEL[role]}으로 입장</span>
+                <span className="text-sm font-semibold text-slate-800">{withRo(ROLE_LABEL[role])} 입장</span>
                 {origin ? <QRCodeSVG value={url} size={176} marginSize={2} /> : null}
                 <code className="w-full break-all rounded bg-slate-50 px-2 py-1 text-[11px] text-slate-600">{url}</code>
               </div>

@@ -201,13 +201,26 @@ describe("runDraft", () => {
     expect(called).toBe(0);
   });
 
-  it("변경 없는 개입 → 게이트를 열지 않는다", async () => {
+  it("변경 없는 개입 → 열려 있는 ①을 그대로 둔다", async () => {
+    const m = memoryDb();
+    await m.human("request", "dev", "x");
+    await runDraft(deps(m.db, fakeLLM()), { sessionId: SID, trigger: "request" });
+    const steer = await m.human("steer", "dev", "그대로 진행");
+    const r = await runDraft(deps(m.db, fakeLLM()), { sessionId: SID, trigger: "steer" });
+    expect(r.body.no_change).toBe(true);
+    expect(m.gates).toHaveLength(1);
+    expect(m.gates[0].status).toBe("pending");
+    expect(m.session.last_steer_consumed_id).toBe(steer.id);
+  });
+
+  it("반려 직후(열린 ① 없음) 변경이 없어도 ①을 다시 연다 — 흐름이 멈추지 않게", async () => {
     const m = memoryDb();
     await m.human("steer", "dev", "그대로 진행");
     const r = await runDraft(deps(m.db, fakeLLM()), { sessionId: SID, trigger: "steer" });
-    expect(r.body.no_change).toBe(true);
-    expect(m.gates).toHaveLength(0);
-    expect(m.session.last_steer_consumed_id).toBe(1);
+    expect(r.status).toBe(200);
+    expect(r.body.no_change).toBeUndefined();
+    expect(m.gates).toHaveLength(1);
+    expect(m.session.state).toBe("gate_scenario");
   });
 
   it("이미 실행 중이면 409 busy", async () => {

@@ -4,6 +4,7 @@ import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { participantKey, readLocal, writeLocal } from "@/lib/client";
 import { ROLE_LABEL } from "@/lib/constants";
+import { withRo } from "@/lib/format";
 import { getBrowserSupabase, supabaseConfigured } from "@/lib/supabase";
 import type { Role } from "@/lib/types";
 import { Centered, ConfigMissing } from "./SessionView";
@@ -113,7 +114,7 @@ export default function JoinClient() {
         disabled={busy || !title}
         className="min-h-14 rounded-xl bg-emerald-700 text-lg font-bold text-white hover:bg-emerald-800 disabled:bg-slate-300"
       >
-        {busy ? "참가 중…" : `${ROLE_LABEL[role]}으로 참가`}
+        {busy ? "참가 중…" : `${withRo(ROLE_LABEL[role])} 참가`}
       </button>
       {error ? <p className="text-sm text-red-700">참가하지 못했습니다: {error}</p> : null}
     </main>
