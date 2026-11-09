@@ -54,7 +54,9 @@ class Rest:
         self.key = key
 
     def call(self, method: str, path: str, body: object | None = None, prefer: str | None = None) -> object:
-        headers = {"apikey": self.key, "Authorization": f"Bearer {self.key}", "Content-Type": "application/json", "Accept": "application/json"}
+        headers = {"apikey": self.key, "Content-Type": "application/json", "Accept": "application/json"}
+        if self.key.startswith("eyJ"):  # legacy anon JWT만 Authorization에도. 새 키(sb_publishable_…)는 apikey 헤더만.
+            headers["Authorization"] = f"Bearer {self.key}"
         if prefer:
             headers["Prefer"] = prefer
         data = None if body is None else json.dumps(body, ensure_ascii=False).encode("utf-8")

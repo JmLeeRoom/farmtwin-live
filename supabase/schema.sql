@@ -159,6 +159,13 @@ end $$;
 
 alter publication supabase_realtime add table sessions, participants, events, gates, run_requests;
 
+-- Data API 권한: 2026-05-30 이후 새 프로젝트(10-30부터는 기존 프로젝트도)는 public 테이블·함수를 Data API에 자동 노출하지 않는다.
+-- 그래서 명시적으로 준다. 이미 권한이 있는 프로젝트에서도 그대로 통과한다.
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on sessions, participants, events, gates, agent_steps, run_requests, runners to anon, authenticated, service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+grant execute on function decide_gate(uuid, uuid, text, text, boolean) to anon, authenticated, service_role;
+
 -- 해커톤 한정: anon 전체 허용. 데모 후 반드시 잠근다.
 do $$ declare t text; begin
   foreach t in array array['sessions','participants','events','gates','agent_steps','run_requests','runners'] loop

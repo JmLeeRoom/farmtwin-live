@@ -34,7 +34,9 @@ npm run dev -- -H 0.0.0.0
 
 1. supabase.com → New project → **SQL Editor**에 `supabase/schema.sql` 전체 붙여넣기 → Run
 2. 같은 곳에 `supabase/smoke_test.sql` → Run → 메시지에 **`SMOKE OK`** (게이트 중복 승인·러너 오프라인·반려 경로 자동 확인, 테스트 행은 스스로 지움)
-3. Project Settings → API의 URL·anon key를 `.env.local`의 `NEXT_PUBLIC_SUPABASE_URL`·`NEXT_PUBLIC_SUPABASE_ANON_KEY`에
+3. Project Settings → API Keys의 **Publishable key**(`sb_publishable_…`, legacy anon key도 됨)와 Project URL을 `.env.local`의 `NEXT_PUBLIC_SUPABASE_ANON_KEY`·`NEXT_PUBLIC_SUPABASE_URL`에
+
+새 프로젝트는 테이블을 Data API에 자동 노출하지 않는다(2026-05-30부터 기본). `schema.sql`이 필요한 권한(grant)을 직접 주므로 생성 화면의 "Automatically expose new tables" 체크 여부와 상관없이 동작한다. 권한 오류(42501·permission denied)가 나면 schema.sql의 `grant` 네 줄만 다시 실행.
 
 ## 3. 연결 점검
 

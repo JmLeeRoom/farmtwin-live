@@ -3,7 +3,7 @@
 > 대상: 이재명(1인 개발) · 제한시간 3시간 · 주제: YC RFS Fall 2026 「Multiplayer AI」
 > 기반: FarmTwinAI MVP(Webots R2025a 정지시험 A/B, 2026-11-01 딸기 집하통로 배치 10회 기록)
 > 이 문서 하나로 구현·배포·리허설·피치까지 끝낼 수 있게 썼다. 위에서 아래로 그대로 실행한다.
-> **v1.4(13:45) 구현본 동기화** — AI SDK v7(`instructions`, OpenAI 호환은 `.chat()`) · `npm i -D vitest @types/node@24` · 이벤트 payload에 `required_role` · 러너 재실행 결과(`payload.digest`) 표시 · pregate.json은 소스 파일을 `dependencies`로 선언(소스는 empty_lanes 불가 — gstack 1.98 `docs-lane.ts`). 구현 저장소: `JmLeeRoom/farmtwin-live`.
+> **v1.4(13:45) 구현본 동기화** — AI SDK v7(`instructions`, OpenAI 호환은 `.chat()`) · `npm i -D vitest @types/node@24` · 이벤트 payload에 `required_role` · 러너 재실행 결과(`payload.digest`) 표시 · pregate.json은 소스 파일을 `dependencies`로 선언(소스는 empty_lanes 불가 — gstack 1.98 `docs-lane.ts`). **Supabase 2026 기본값 대응**: 새 프로젝트는 public 테이블을 Data API에 자동 노출하지 않으므로(2026-05-30~) §5 끝에 `grant` 4줄 추가, 키는 Publishable key(`sb_publishable_…`)도 그대로 쓴다. 구현 저장소: `JmLeeRoom/farmtwin-live`.
 > **v1.3(13:10)** — §18을 설치된 gstack 1.98 실제 동작 기준으로 교체(작업 브랜치·pregate·브라우저 없는 `/qa`·`/investigate` 없음), Next 16.4 주의사항(cacheComponents·allowedDevOrigins·보안 컨텍스트)을 CLAUDE.md 예시에 반영.
 > **v1.2 엔지니어링 리뷰 반영(12:20)** — 게이트 결정을 DB 함수(`decide_gate`)로 원자화 · 에이전트 단일 실행 락 · "pending 게이트는 세션당 1개" 규칙 · ③게이트 설명을 세션 생성 시 미리 캐시 · 최소 테스트 세트(§19) · 엣지케이스(§20). 범위와 §12 타임박스는 그대로.
 
@@ -296,6 +296,13 @@ begin
 end $$;
 
 alter publication supabase_realtime add table sessions, participants, events, gates, run_requests;
+
+-- Data API 권한: 2026-05-30 이후 새 프로젝트(10-30부터는 기존 프로젝트도)는 public 테이블·함수를 Data API에 자동 노출하지 않는다.
+-- 그래서 명시적으로 준다. 이미 권한이 있는 프로젝트에서도 그대로 통과한다.
+grant usage on schema public to anon, authenticated, service_role;
+grant select, insert, update, delete on sessions, participants, events, gates, agent_steps, run_requests, runners to anon, authenticated, service_role;
+grant usage, select on all sequences in schema public to anon, authenticated, service_role;
+grant execute on function decide_gate(uuid, uuid, text, text, boolean) to anon, authenticated, service_role;
 
 -- 해커톤 한정: anon 전체 허용. 데모 후 반드시 잠근다.
 do $$ declare t text; begin
